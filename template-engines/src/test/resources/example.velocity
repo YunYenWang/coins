@@ -1,0 +1,12 @@
+<html>
+<body>
+
+#foreach( $e in $list )
+	#if ( $validator.isNotBlank($e) )
+		<p> $e </p>
+	#end
+#end
+	
+</body>
+</html>
+

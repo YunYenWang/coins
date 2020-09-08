@@ -20,12 +20,4 @@ public class FibonacciImpl {
 			return calculate(number - 1) + calculate(number - 2);
 		}		
 	}
-	
-	public static void main(String[] args) {
-		int n = 10;
-		
-		FibonacciImpl fi = new FibonacciImpl();
-		
-		fi.test(n);
-	}
 }

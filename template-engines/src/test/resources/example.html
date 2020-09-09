@@ -1,0 +1,7 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+	<p th:each="e : ${list}" th:if="${validator.isNotBlank(e)}"	th:text=" ${e} "> XXX </p>
+		
+</body>
+</html>

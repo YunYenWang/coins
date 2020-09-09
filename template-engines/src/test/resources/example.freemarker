@@ -1,0 +1,11 @@
+<html>
+<body>
+
+<#list list as e>
+	<#if validator.isNotBlank(e)>
+		<p> ${e} </p>
+	</#if>
+</#list>
+	
+</body>
+</html>

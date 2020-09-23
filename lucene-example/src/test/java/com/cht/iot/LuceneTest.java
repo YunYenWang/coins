@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.stream.Stream;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -32,12 +33,19 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class LuceneTest {
+	
+	String path = "..";
+	String suffix = ".java";
+	
+	String index = "/tmp/index";
+	
+	String keyword = "ManagedResource";
 
 	@Test
 	void buildIndex() throws IOException {
 		Analyzer analyzer = new StandardAnalyzer();
 		
-		Path indexPath = Paths.get("/tmp/index");
+		Path indexPath = Paths.get(index);
 		if (Files.isDirectory(indexPath) == false) {
 			indexPath = Files.createDirectories(indexPath);
 		}
@@ -47,7 +55,7 @@ public class LuceneTest {
 		IndexWriterConfig config = new IndexWriterConfig(analyzer);
 		IndexWriter writer = new IndexWriter(directory, config);
 						
-		Files.walkFileTree(Paths.get(".."), new SimpleFileVisitor<Path>() {
+		Files.walkFileTree(Paths.get(path), new SimpleFileVisitor<Path>() {
 			
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -55,7 +63,7 @@ public class LuceneTest {
 				
 				String filename = f.getAbsolutePath();
 				
-				if (f.getName().endsWith(".java")) {
+				if (f.getName().endsWith(suffix)) {
 					Document doc = new Document();
 					
 					doc.add(new Field("filename", filename, TextField.TYPE_STORED));
@@ -80,17 +88,15 @@ public class LuceneTest {
 	void searchIt() throws IOException, ParseException {
 		Analyzer analyzer = new StandardAnalyzer();
 		
-		Path indexPath = Paths.get("/tmp/index");
+		Path indexPath = Paths.get(index);
 		Directory directory = FSDirectory.open(indexPath);
 		
 		DirectoryReader reader = DirectoryReader.open(directory);
 		IndexSearcher searcher = new IndexSearcher(reader);
 		
 		QueryParser parser = new QueryParser("body", analyzer);
-		
-		String keyword = "ManagedResource";
-		
 		Query query = parser.parse(keyword);
+		
 		TopDocs docs = searcher.search(query, 10);
 		for (ScoreDoc sd : docs.scoreDocs) {
 			Document doc = searcher.doc(sd.doc);
@@ -101,5 +107,29 @@ public class LuceneTest {
 		}
 		
 		reader.close();
-	}	
+	}
+	
+	@Test
+	void linearSearch() throws IOException {
+		Files.walkFileTree(Paths.get(path), new SimpleFileVisitor<Path>() {
+			
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				File f = file.toFile();
+				
+				if (f.getName().endsWith(suffix)) {
+					try (Stream<String> stream = Files.lines(file)) {
+						stream
+							.filter(line -> line.contains(keyword))
+							.forEach(line -> log.info("Found keyword in '{}'", file));
+						
+					} catch (Exception e) {
+						log.error("Error in {}", file, e);
+					}
+				}
+				
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	}
 }

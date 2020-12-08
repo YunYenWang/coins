@@ -2,6 +2,7 @@ package com.cht.iot.lab5;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,13 +36,26 @@ public class MyCache<K, V> {
 		AtomicInteger count = new AtomicInteger();
 		
 		synchronized (cache) {	
-			for (Entry<K, V> e : cache.values()) {
+			Iterator<Entry<K, V>> it = cache.values().iterator();
+			while (it.hasNext()) {
+				Entry<K, V> e = it.next();
+				
 				if (e.isExpired()) {
-					cache.remove(e.key);
+					it.remove();
 					
 					count.incrementAndGet();
 				}
 			}
+			
+//			for (Entry<K, V> e : cache.values()) {
+//				if (e.isExpired()) {
+//					cache.remove(e.key);
+//					
+//					count.incrementAndGet();
+//				}
+//			}
+			
+			
 		}
 		
 		return count.intValue();

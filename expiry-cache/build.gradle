@@ -1,4 +1,6 @@
 plugins {
+	id 'org.springframework.boot' version '2.2.2.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
 	id 'java'
 	id 'eclipse'
 }
@@ -11,18 +13,22 @@ repositories {
 }
 
 dependencies {
-	compileOnly 'org.projectlombok:lombok:1.18.12'
-	annotationProcessor 'org.projectlombok:lombok:1.18.12'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 
-	implementation 'ch.qos.logback:logback-classic:1.2.3'
+	implementation 'org.springframework.boot:spring-boot-starter'
 
 	implementation 'com.google.guava:guava:30.0-jre'
 	implementation 'org.ehcache:ehcache:3.8.1'
-	implementation 'javax.cache:cache-api:1.1.1'	
+	implementation 'javax.cache:cache-api:1.1.1'
 
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api'
 
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.1'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+	
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
 }
 
 test {

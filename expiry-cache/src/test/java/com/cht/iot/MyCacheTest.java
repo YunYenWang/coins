@@ -68,7 +68,7 @@ public class MyCacheTest {
 				String key = String.format("%09d", i);
 				Integer value = i;
 				
-				cache.put(key, value, ttl, unit);
+				cache.put(key, value, 1, TimeUnit.MILLISECONDS);
 			}
 			
 		}).start();

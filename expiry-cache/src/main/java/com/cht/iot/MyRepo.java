@@ -31,7 +31,7 @@ public class MyRepo {
 	}
 	
 	@CacheEvict(cacheNames = "age")
-	public void cleanMyAge(String name) {		
+	public void cleanMyAge(String name) {
 		log.info("Clean my age for {}", name);
 	}
 	

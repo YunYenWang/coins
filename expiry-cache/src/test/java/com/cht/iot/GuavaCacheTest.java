@@ -74,7 +74,6 @@ public class GuavaCacheTest {
 		
 		LoadingCache<String, Integer> cache = CacheBuilder.newBuilder()
 				.expireAfterWrite(1, TimeUnit.MILLISECONDS)
-				.recordStats()
 				.removalListener(new RemovalListener<String, Integer>() {
 					
 					@Override

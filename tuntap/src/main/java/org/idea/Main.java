@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Main {
-	static final int MTU = 1500;
+	static final int MTU = 2048; // 1514 is enough
 	
 	final TunTap tap;
 	

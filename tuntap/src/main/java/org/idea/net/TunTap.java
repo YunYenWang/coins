@@ -7,12 +7,13 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 public class TunTap implements Closeable {
+	static final int MTU = 4096;
 	
 	static native int open(String dev);	
 	static native void close(int fd);	
 	static native int write(int fd, ByteBuffer d, int len);	
 	static native boolean await(int fd, long timeout);	
-	static native int read(int fd, ByteBuffer d);
+	static native int read(int fd, ByteBuffer d, int len);
 	
 	final int fd;
 	
@@ -50,10 +51,14 @@ public class TunTap implements Closeable {
 	
 	public OutputStream getOutputStream() {
 		return new OutputStream() {
+			ByteBuffer bb = ByteBuffer.allocateDirect(MTU);
 			
 			@Override
 			public void write(byte[] b, int off, int len) throws IOException {
-				ByteBuffer bb = ByteBuffer.allocateDirect(len);
+				len = Math.min(len, MTU);
+				
+				bb.position(0);
+				bb.limit(bb.capacity());
 				bb.put(b, off, len);
 				bb.flip();
 				
@@ -62,7 +67,8 @@ public class TunTap implements Closeable {
 			
 			@Override
 			public void write(int b) throws IOException {
-				ByteBuffer bb = ByteBuffer.allocateDirect(1);
+				bb.position(0);
+				bb.limit(bb.capacity());
 				bb.put((byte) b);
 				bb.flip();
 				
@@ -78,6 +84,7 @@ public class TunTap implements Closeable {
 	
 	public InputStream getInputStream() {
 		return new InputStream() {
+			ByteBuffer bb = ByteBuffer.allocateDirect(MTU);
 			
 			@Override
 			public int read(byte[] b, int off, int len) throws IOException {
@@ -85,13 +92,15 @@ public class TunTap implements Closeable {
 					return 0;
 				}
 				
-				ByteBuffer bb = ByteBuffer.allocateDirect(len);
-				int s = TunTap.read(fd, bb);
+				len = Math.min(len, MTU);
+				
+				int s = TunTap.read(fd, bb, len);
 				if (s < 0) {
 					throw new IOException("Failed to read: " + s);
 				}
 				
-				bb.limit(s);
+				bb.position(0);
+				bb.limit(s);				
 				
 				for (int i = 0;i < s;i++) {
 					b[off + i] = bb.get(i);
@@ -106,15 +115,15 @@ public class TunTap implements Closeable {
 					return -1;
 				}
 				
-				ByteBuffer bb = ByteBuffer.allocateDirect(1);
-				int s = TunTap.read(fd, bb);
+				int s = TunTap.read(fd, bb, 1);
 				if (s < 0) {
 					throw new IOException("Failed to read: " + s);
 				}
 				
+				bb.position(0);
 				bb.limit(s);
 				
-				return bb.get(0);
+				return bb.get();
 			}
 			
 			@Override

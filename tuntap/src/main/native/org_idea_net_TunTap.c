@@ -63,10 +63,9 @@ JNIEXPORT jboolean JNICALL Java_org_idea_net_TunTap_await(JNIEnv *env, jclass th
   return select(fd + 1, &set, NULL, NULL, &to);
 }
 
-JNIEXPORT jint JNICALL Java_org_idea_net_TunTap_read(JNIEnv *env, jclass this, jint fd, jobject buf) {
-  char* b = (char *)(*env)->GetDirectBufferAddress(env, buf);
-  jlong capacity = (*env)->GetDirectBufferCapacity(env, buf);
+JNIEXPORT jint JNICALL Java_org_idea_net_TunTap_read(JNIEnv *env, jclass this, jint fd, jobject buf, jint len) {
+  char* b = (char *)(*env)->GetDirectBufferAddress(env, buf);  
 
-  return read(fd, b, capacity);
+  return read(fd, b, len);
 }
 

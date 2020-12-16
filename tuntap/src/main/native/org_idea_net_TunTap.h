@@ -45,7 +45,7 @@ JNIEXPORT jboolean JNICALL Java_org_idea_net_TunTap_await
  * Signature: (ILjava/nio/ByteBuffer;)I
  */
 JNIEXPORT jint JNICALL Java_org_idea_net_TunTap_read
-  (JNIEnv *, jclass, jint, jobject);
+  (JNIEnv *, jclass, jint, jobject, jint);
 
 #ifdef __cplusplus
 }

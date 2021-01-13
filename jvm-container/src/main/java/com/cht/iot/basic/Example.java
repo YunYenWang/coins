@@ -19,7 +19,7 @@ public class Example {
 		Object o = clazz.newInstance(); // equals to 'Object o = new Object()'
 		
 		log.info("Plain old object : {}", o);
-		
+	
 		// customized case		
 		loader = new MyClassLoader();		
 		

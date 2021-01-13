@@ -31,6 +31,8 @@ public class Main {
 		List<String> excludeds = new ArrayList<>();		
 		List<Long> tids = new ArrayList<>();
 		
+		long interval = 1_000L;
+		
 		for (int i = 0;i < args.length;i++) {
 			String arg = args[i];
 			
@@ -55,8 +57,11 @@ public class Main {
 			} else if ("-t".equals(arg)) {
 				tids.add(Long.parseLong(args[++i]));
 				
+			} else if ("--interval".equals(arg)) {
+				interval = Long.parseLong(args[++i]);
+				
 			} else {
-				System.out.println("jmx-cli -d 127.0.0.1:9005 --info");
+				System.out.println("jmx-cli -d 127.0.0.1:9005 --info [--interval ms]");
 				System.out.println("jmx-cli -d 127.0.0.1:9005 --gc");
 				System.out.println("jmx-cli -d 127.0.0.1:9005 --dump-runnable-threads [-e excluded_name] [-e excluded_name]");
 				System.out.println("jmx-cli -d 127.0.0.1:9005 --dump-specified-threads -t 1 -t 2 -t 3");				
@@ -83,21 +88,22 @@ public class Main {
 				
 			} else {
 				for (;;) {				
-					info(osxb, mxb);					
-					Thread.sleep(1_000L);
+					info(osxb, mxb, txb);					
+					Thread.sleep(interval);
 				}
 			}
 		}
 	}
 	
-	static void info(OperatingSystemMXBean osxb, MemoryMXBean mxb) {
+	static void info(OperatingSystemMXBean osxb, MemoryMXBean mxb, ThreadMXBean txb) {
 		MemoryUsage mu = mxb.getHeapMemoryUsage();
 		
-		System.out.printf("[%s] Memory max: %,d MB, committed: %,d MB, used: %,d MB, Loading: %.2f %%\n",
+		System.out.printf("[%s] Memory max: %,d MB, committed: %,d MB, used: %,d MB, threads: %,d, Loading: %.2f %%\n",
 				DF.format(new Date()),
 				mu.getMax() / BYTES_PER_MB,
 				mu.getCommitted() / BYTES_PER_MB,
 				mu.getUsed() / BYTES_PER_MB,
+				txb.getThreadCount(),
 				osxb.getSystemLoadAverage() / osxb.getAvailableProcessors() * 100d);
 	}	
 	

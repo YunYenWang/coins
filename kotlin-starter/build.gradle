@@ -1,0 +1,28 @@
+plugins {
+	id 'org.jetbrains.kotlin.jvm' version '1.4.31'
+	id 'java'
+	id 'application'
+	id 'eclipse'
+}
+
+repositories {
+	jcenter()
+}
+
+dependencies {
+	compileOnly 'org.projectlombok:lombok:1.18.16'
+	annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+	implementation 'ch.qos.logback:logback-classic:1.2.3'
+
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.1'
+}
+
+test {
+	useJUnitPlatform()
+}
+
+application {
+	mainClass = 'com.cht.iot.MainKt'
+}

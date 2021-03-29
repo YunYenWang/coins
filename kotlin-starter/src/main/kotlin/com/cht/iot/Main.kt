@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 private val log = LoggerFactory.getLogger("main"); // this is a Java object
 
 fun main(args: Array<String>) {
-    var staff = Staff() // this is a Java object
+    val staff = Staff() // this is a Java object
 
     staff.id = "037682"
     staff.name = "Rick"

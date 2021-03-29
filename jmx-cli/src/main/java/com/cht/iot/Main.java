@@ -1,5 +1,6 @@
 package com.cht.iot;
 
+import java.io.IOException;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.management.OperatingSystemMXBean;
@@ -12,9 +13,18 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
 import javax.management.JMX;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanException;
+import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.OperationsException;
+import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -28,6 +38,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {		
 		Action action = Action.dump_runnable_threads;
 		String endpoint = "127.0.0.1:9005";
+		String objectName = "";
 		List<String> excludeds = new ArrayList<>();		
 		List<Long> tids = new ArrayList<>();
 		
@@ -42,6 +53,9 @@ public class Main {
 			} else if ("--gc".equals(arg)) {
 				action = Action.gc;
 				
+			} else if ("--show".equals(arg)) {
+				action = Action.show;
+				
 			} else if ("--dump-runnable-threads".equals(arg)) {
 				action = Action.dump_runnable_threads;
 				
@@ -50,6 +64,9 @@ public class Main {
 				
 			} else if ("-d".equals(arg)) {
 				endpoint = args[++i];
+				
+			} else if ("-o".equals(arg)) {
+				objectName = args[++i];
 				
 			} else if ("-e".equals(arg)) {
 				excludeds.add(args[++i]);
@@ -63,6 +80,7 @@ public class Main {
 			} else {
 				System.out.println("jmx-cli -d 127.0.0.1:9005 --info [--interval ms]");
 				System.out.println("jmx-cli -d 127.0.0.1:9005 --gc");
+				System.out.println("jmx-cli -d 127.0.0.1:9005 --show -o object-name");
 				System.out.println("jmx-cli -d 127.0.0.1:9005 --dump-runnable-threads [-e excluded_name] [-e excluded_name]");
 				System.out.println("jmx-cli -d 127.0.0.1:9005 --dump-specified-threads -t 1 -t 2 -t 3");				
 				System.exit(1);
@@ -86,6 +104,9 @@ public class Main {
 			} else if (action == Action.gc) {
 				gc(mxb);
 				
+			} else if (action == Action.show) {
+				show(mbsc, objectName);
+				
 			} else {
 				for (;;) {				
 					info(osxb, mxb, txb);					
@@ -106,6 +127,29 @@ public class Main {
 				txb.getThreadCount(),
 				osxb.getSystemLoadAverage() / osxb.getAvailableProcessors() * 100d);
 	}	
+	
+	static void show(MBeanServerConnection mbsc, String objectName) throws OperationsException, ReflectionException, IOException, MBeanException {
+		ObjectName on = new ObjectName(objectName);
+		
+		MBeanInfo mbi = mbsc.getMBeanInfo(on);
+		for (MBeanAttributeInfo mai :  mbi.getAttributes()) {
+			Object attr = mbsc.getAttribute(on, mai.getName());
+			
+			System.out.printf("%s = %s\n", mai.getName(), toString(attr));
+		}
+	}
+	
+	static String toString(Object o) {
+		if (o instanceof Integer) {
+			return String.format("%,d", (Integer) o);
+			
+		} else if (o instanceof Long) {
+			return String.format("%,d", (Long) o);
+			
+		}
+		
+		return String.valueOf(o);
+	}
 	
 	static void gc(MemoryMXBean mxb) {
 		mxb.gc();
@@ -166,6 +210,7 @@ public class Main {
 	enum Action {
 		info,
 		gc,
+		show,
 		dump_runnable_threads,
 		dump_specified_threads
 	}
